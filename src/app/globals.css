@@ -1,12 +1,13 @@
 :root {
   color-scheme: light;
-  --bg: #f4f7fb;
+  --bg: #f4f6ff;
   --card: #ffffff;
-  --text: #14213d;
-  --muted: #4f5d75;
-  --border: #d9e2ec;
-  --accent: #2d6cdf;
-  --accent-soft: #eef4ff;
+  --text: #0f1b3d;
+  --muted: #52607a;
+  --border: #d7deea;
+  --accent: #3a4ed9;
+  --accent-soft: #eef1ff;
+  --warm: #ffb86c;
 }
 
 * {
@@ -20,10 +21,14 @@ body {
   color: var(--text);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 main.page {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem 1rem 3rem;
+  padding: 1rem 1rem 3rem;
   display: grid;
   gap: 1rem;
 }
@@ -36,7 +41,7 @@ main.page {
 }
 
 .hero {
-  background: linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
+  background: linear-gradient(130deg, #edf0ff 0%, #ffffff 55%, #fff4e7 100%);
 }
 
 .eyebrow {
@@ -51,6 +56,10 @@ h1,
 h2,
 h3 {
   margin: 0 0 0.65rem;
+}
+
+h1 {
+  font-size: clamp(1.7rem, 3.7vw, 2.6rem);
 }
 
 .subtitle,
@@ -77,7 +86,8 @@ h3 {
   border-radius: 12px;
   background: #fff;
   padding: 1rem;
-  cursor: pointer;
+  display: grid;
+  gap: 0.6rem;
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 
@@ -91,11 +101,32 @@ h3 {
   background: var(--accent-soft);
 }
 
+.tagRow {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  border: 1px solid #ccd5ff;
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.78rem;
+  color: #3343a3;
+  background: #f7f8ff;
+}
+
 .snippetWrap {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.8rem;
   background: #0d1321;
+}
+
+.snippetLabel {
+  color: #d0ddff;
+  font-size: 0.85rem;
+  margin: 0 0 0.45rem;
 }
 
 .snippetWrap pre {
@@ -117,10 +148,40 @@ button {
   cursor: pointer;
 }
 
+a.secondaryCta {
+  display: inline-block;
+  margin-left: 0.6rem;
+  color: #2139b0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.heroCtas {
+  margin-top: 0.8rem;
+}
+
+.badge {
+  margin-top: 0.8rem;
+  font-size: 0.82rem;
+  width: fit-content;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #ffe3bd;
+  color: #9f5f14;
+}
+
 .steps {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
+}
+
+.flow .arrow {
+  border: 0;
+  background: transparent;
+  color: #95a1be;
+  padding: 0.35rem 0.2rem;
 }
 
 .steps span {
@@ -145,15 +206,28 @@ button {
   border-bottom: 1px dashed var(--border);
 }
 
-.faqList details {
+.row.highlight {
+  border: 1px solid #cfd8ff;
+  border-radius: 10px;
+  padding: 0.5rem;
+  background: #f6f8ff;
+}
+
+.faqItem {
   border: 1px solid var(--border);
   border-radius: 10px;
   margin-bottom: 0.5rem;
   padding: 0.6rem 0.7rem;
 }
 
-.faqList summary {
-  cursor: pointer;
+.faqButton {
+  width: 100%;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -161,6 +235,58 @@ button {
   text-align: center;
   color: var(--muted);
   margin-top: 0.4rem;
+}
+
+.footer a,
+.linksLine a {
+  color: #2c3fb2;
+}
+
+.tabRow,
+.osRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.tab {
+  margin: 0;
+  background: #f2f5ff;
+  color: #2e3fa6;
+  border: 1px solid #d8e0ff;
+}
+
+.activeTab {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.topNav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  padding: 0.55rem;
+  border-radius: 12px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.topNav.solid {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 24px rgba(15, 27, 61, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.topNav button {
+  margin: 0;
+  background: transparent;
+  color: #2b3a96;
+  border: 1px solid #dbe2ff;
 }
 
 @media (max-width: 900px) {
@@ -172,5 +298,14 @@ button {
   .row {
     grid-template-columns: 1fr;
     gap: 0.25rem;
+  }
+
+  .flow .arrow {
+    display: none;
+  }
+
+  a.secondaryCta {
+    display: inline-block;
+    margin: 0.6rem 0 0;
   }
 }

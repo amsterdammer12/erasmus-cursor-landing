@@ -1,145 +1,160 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type TrackId = "cursor" | "claude-code" | "both";
+type OsId = "mac" | "windows";
 
 const tracks = [
   {
     id: "cursor" as const,
-    title: "Track A: Cursor (Visual)",
-    level: "Best for first-timers",
-    audience: "Ideal for the 51 participants new to Claude Code.",
-    description:
-      "Use a visual editor and built-in assistant chat so you can focus on ideas, not terminal commands.",
+    emoji: "🟢",
+    title: "Track A: Cursor",
+    subtitle: "I want to see everything",
+    tags: ["Visual", "Beginner-friendly", "Click & see"],
+    note: "Recommended default for first-time builders.",
   },
   {
     id: "claude-code" as const,
-    title: "Track B: Claude Code (Terminal)",
-    level: "Best for confident builders",
-    audience: "Great for experienced students and fast learners.",
-    description:
-      "Use Claude Code in the terminal for speed and direct control while building your MVP.",
+    emoji: "🟡",
+    title: "Track B: Claude Code",
+    subtitle: "I want the real developer experience",
+    tags: ["Terminal", "Lightweight", "Pro workflow"],
+    note: "Great for curious learners and faster iteration.",
   },
   {
     id: "both" as const,
+    emoji: "🔴",
     title: "Track C: Both",
-    level: "Best for advanced teams",
-    audience: "Perfect for the 15 experts and hybrid workflows.",
-    description:
-      "Switch between Cursor for visual edits and Claude Code for rapid command-driven iteration.",
+    subtitle: "I want full control",
+    tags: ["Advanced", "Full control", "Best of both"],
+    note: "Use Cursor for context and Claude Code for speed.",
   },
 ];
 
-const setupByTrack: Record<TrackId, { title: string; steps: string[]; snippets: string[] }> = {
+const setupByTrack: Record<TrackId, { title: string; intro: string; steps: string[] }> = {
   cursor: {
     title: "Setup for Track A (Cursor)",
+    intro: "Best for complete beginners and visual learners.",
     steps: [
-      "Install Cursor and sign in.",
-      "Redeem your Anthropic credit link before event day.",
-      "Create a new folder for your hackathon project.",
-      "Open the folder in Cursor and ask the assistant to scaffold your app.",
-    ],
-    snippets: [
-      "# Optional: check Node.js version\nnode -v",
-      "# Start your app after setup\nnpm install\nnpm run dev",
+      "Download Cursor from cursor.com.",
+      "Create a free account and sign in.",
+      "Install Git and Node.js (v20+).",
+      "Open Cursor -> Settings -> Models -> Anthropic API Key.",
+      "Paste your key and select Sonnet 4.6.",
     ],
   },
   "claude-code": {
     title: "Setup for Track B (Claude Code)",
+    intro: "Best for participants comfortable with terminal workflows.",
     steps: [
-      "Install Node.js LTS and Git.",
-      "Install Claude Code CLI.",
-      "Redeem your Anthropic credit link before event day.",
-      "Open a terminal in your project folder and start building.",
-    ],
-    snippets: [
-      "# Install Claude Code CLI\nnpm install -g @anthropic-ai/claude-code",
-      "# Start a new project folder\nmkdir my-hackathon-app && cd my-hackathon-app\nclaude",
+      "Open your terminal app.",
+      "Install Claude Code using the command for your OS.",
+      "Close and reopen terminal after install.",
+      "Install Git and Node.js (v20+).",
+      "Set ANTHROPIC_API_KEY and run claude.",
     ],
   },
   both: {
     title: "Setup for Track C (Both)",
+    intro: "Use Cursor UI plus Claude Code in terminal for maximum control.",
     steps: [
-      "Install Cursor for visual editing.",
-      "Install Claude Code CLI for terminal power.",
-      "Redeem your Anthropic credit link before event day.",
-      "Use whichever interface fits each task.",
-    ],
-    snippets: [
-      "# Verify global CLI\nclaude --help",
-      "# Typical hybrid flow\ngit init\nnpm init -y\n# open in Cursor and continue with Claude",
+      "Complete setup from Track A and Track B.",
+      "Run Claude Code inside Cursor terminal: View -> Terminal -> claude.",
+      "Switch tools based on task complexity.",
     ],
   },
 };
 
 const projectIdeas = [
-  "Lecture Summary Buddy: paste notes, get a clean summary + quiz.",
-  "Study Sprint Planner: generate a 7-day plan from exam topics.",
-  "CV Bullet Improver: rewrite internship bullets with stronger impact.",
-  "Email Tone Fixer: turn rough drafts into clear, polite emails.",
-  "Club FAQ Bot: answer questions from a small static knowledge file.",
-  "Simple Habit Coach: one daily check-in with personalized feedback.",
-  "Meeting Action Extractor: pull action items from pasted notes.",
-  "Idea-to-Name Generator: generate startup/app names + short taglines.",
+  "💰 Expense Splitter - Add expenses and show who owes who",
+  "📝 Meeting Notes - Paste text and get a structured summary",
+  "🎯 Habit Tracker - Check off habits and track your streak",
+  "🎨 Portfolio Site - Clean project cards with your work",
+  "🎉 Event RSVP - Create event, share link, track RSVPs",
+  "📧 Email Drafter - Describe context and get 3 options",
+  "📚 Course Reviews - Submit and browse class reviews",
+  "🤖 Document Q&A - Upload PDF and ask questions",
 ];
 
 const tips = [
-  "Choose one feature only and make it demo-solid.",
-  "Design your 30-second demo before writing code.",
-  "Ship a happy path first; edge cases come later.",
-  "Ask AI for tests and quick QA prompts before freeze.",
-  "Use experts as setup floaters from 13:30 to 14:30.",
-  "At 17:30, stop building and polish your story.",
+  "Start fresh conversations between features to keep AI sharp.",
+  "Be specific: describe exact UI behavior and placement.",
+  "Build one feature at a time, not everything at once.",
+  "Commit after each working piece so rollback stays easy.",
+  "Do not paste full files; AI can read your project directly.",
+  "If it breaks repeatedly, start a new chat with a clearer prompt.",
 ];
 
 const faq = [
   {
-    q: "Do I need to pay for API usage?",
-    a: "No. Anthropic is sponsoring credits for participants.",
+    q: "Do I need to know how to code?",
+    a: "No. AI writes the code; you guide it with clear prompts.",
   },
   {
-    q: "Can beginners participate?",
-    a: "Yes. Track A is designed for complete beginners with mentor support.",
+    q: "Which track should I choose?",
+    a: "Never used terminal: Track A. Curious: Track B. Power users: Track C.",
   },
   {
-    q: "Can I work solo?",
-    a: "Yes. About 15 participants plan to go solo, and that's fully supported.",
+    q: "What if I break something?",
+    a: "Use git checkout . to revert unstaged local file changes quickly.",
   },
   {
-    q: "When does coding actually start?",
-    a: "Official hacking starts at 14:30 for everyone.",
+    q: "What can I build in 3 hours?",
+    a: "One core feature with a crisp 30-second demo.",
   },
   {
-    q: "What happens at code freeze?",
-    a: "At 17:30, you stop adding features and focus on polish + submission prep.",
+    q: "AI gave an error. What now?",
+    a: "Start a fresh conversation and give a clearer, smaller request.",
   },
   {
-    q: "What if I still need a team?",
-    a: "Team matching happens at 14:00 and mentors will help connect people.",
+    q: "How do I deploy?",
+    a: "Ask your AI to deploy to Vercel; it should take only a few minutes.",
+  },
+  {
+    q: "Do API credits cost me anything?",
+    a: "No. Credits are free for participants, provided by Anthropic.",
+  },
+  {
+    q: "Can I keep my project after the hackathon?",
+    a: "Yes. It is yours to keep on GitHub and the Vercel free tier.",
+  },
+  {
+    q: "Should I set up before event day?",
+    a: "Yes. Pre-setup saves 30+ minutes and prevents day-of delays.",
   },
 ];
 
 const schedule = [
   ["13:00", "Doors open, check-in"],
   ["13:15", "Welcome + quick intros"],
-  ["13:30", "Setup session - mentors help beginners"],
-  ["14:00", "Team matching for solos (~40 people)"],
-  ["14:30", "Hacking begins for everyone"],
+  ["13:30", "Setup session (mentors help beginners; ready teams start)"],
+  ["14:00", "Team matching for solos"],
+  ["14:30", "Hacking begins"],
   ["16:00", "Midpoint check-in"],
-  ["17:30", "Code freeze - polish and prep submission"],
+  ["17:30", "Code freeze - polish and prep demo"],
   ["18:00", "Submissions due"],
-  ["18:00-19:00", "Judging panel reviews"],
+  ["18:00-19:00", "Judging panel review"],
   ["19:00", "Top 5-6 teams present"],
   ["19:30", "Winners announced"],
-  ["19:30-20:00", "Networking + close"],
+  ["19:30-20:00", "Networking"],
 ];
 
 export default function HomePage() {
   const [selectedTrack, setSelectedTrack] = useState<TrackId>("cursor");
+  const [selectedOs, setSelectedOs] = useState<OsId>("mac");
+  const [openFaq, setOpenFaq] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [copiedText, setCopiedText] = useState<string>("");
 
   const selectedSetup = useMemo(() => setupByTrack[selectedTrack], [selectedTrack]);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const copySnippet = async (snippet: string) => {
     try {
@@ -151,80 +166,212 @@ export default function HomePage() {
     }
   };
 
+  const snippetByTrack = {
+    cursor: [
+      {
+        key: "git-check",
+        label: "Check Git + Node",
+        code:
+          selectedOs === "mac"
+            ? "git --version\nnode --version"
+            : "git --version\nnode --version",
+      },
+    ],
+    "claude-code": [
+      {
+        key: "claude-install",
+        label: "Install Claude Code",
+        code:
+          selectedOs === "mac"
+            ? "curl -fsSL https://claude.ai/install.sh | bash"
+            : "irm https://claude.ai/install.ps1 | iex",
+      },
+      {
+        key: "set-key",
+        label: "Set API Key",
+        code:
+          selectedOs === "mac"
+            ? 'export ANTHROPIC_API_KEY="sk-ant-your-key-here"'
+            : '$env:ANTHROPIC_API_KEY="sk-ant-your-key-here"',
+      },
+    ],
+    both: [
+      {
+        key: "hybrid-tip",
+        label: "Run inside Cursor terminal",
+        code: "claude",
+      },
+    ],
+  };
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const selectTrack = (trackId: TrackId) => {
+    setSelectedTrack(trackId);
+    scrollTo("setup");
+  };
+
   return (
     <main className="page">
-      <section className="hero card">
+      <nav className={`topNav ${isScrolled ? "solid" : ""}`}>
+        <button type="button" onClick={() => scrollTo("tracks")}>
+          Tracks
+        </button>
+        <button type="button" onClick={() => scrollTo("setup")}>
+          Setup
+        </button>
+        <button type="button" onClick={() => scrollTo("how")}>
+          How It Works
+        </button>
+        <button type="button" onClick={() => scrollTo("ideas")}>
+          Ideas
+        </button>
+        <button type="button" onClick={() => scrollTo("schedule")}>
+          Schedule
+        </button>
+        <button type="button" onClick={() => scrollTo("faq")}>
+          FAQ
+        </button>
+      </nav>
+
+      <section className="hero card" id="hero">
         <p className="eyebrow">Erasmus AI Society x Claude Hackathon</p>
-        <h1>Build with AI in 3 focused hours</h1>
+        <h1>Build real products with AI - no coding experience required</h1>
         <p className="subtitle">
-          Thursday, April 9, 2026 · 13:00-20:00 · Erasmus University Rotterdam
+          Thursday, April 9 · 13:00-20:00 · Erasmus University Rotterdam
         </p>
         <p>
-          Pick your comfort track, complete setup before event day, and arrive ready to build.
-          Powered by Anthropic credits.
+          123 participants, three comfort tracks, one goal: everyone starts building by 14:30.
         </p>
+        <div className="heroCtas">
+          <button type="button" onClick={() => scrollTo("tracks")}>
+            Choose Your Track
+          </button>
+          <a className="secondaryCta" href="#">
+            Redeem Your Credits
+          </a>
+        </div>
+        <p className="badge">Powered by Anthropic</p>
       </section>
 
-      <section className="card">
+      <section className="card" id="tracks">
         <h2>Choose Your Track</h2>
+        <p className="muted">Not sure? Start with Track A. You can always switch.</p>
         <div className="grid three">
           {tracks.map((track) => (
-            <button
-              key={track.id}
-              className={`track ${selectedTrack === track.id ? "active" : ""}`}
-              onClick={() => setSelectedTrack(track.id)}
-              type="button"
-            >
+            <article key={track.id} className={`track ${selectedTrack === track.id ? "active" : ""}`}>
               <h3>{track.title}</h3>
-              <p className="muted">{track.level}</p>
-              <p>{track.audience}</p>
-              <p>{track.description}</p>
-            </button>
+              <p className="muted">{track.emoji} {track.subtitle}</p>
+              <p>{track.note}</p>
+              <div className="tagRow">
+                {track.tags.map((tag) => (
+                  <span key={tag} className="tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <button onClick={() => selectTrack(track.id)} type="button">
+                Open setup tab
+              </button>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className="card">
+      <section className="card" id="setup">
         <h2>Setup Guide</h2>
+        <div className="tabRow">
+          {tracks.map((track) => (
+            <button
+              key={track.id}
+              type="button"
+              className={selectedTrack === track.id ? "tab activeTab" : "tab"}
+              onClick={() => setSelectedTrack(track.id)}
+            >
+              {track.title.replace(": ", " ")}
+            </button>
+          ))}
+        </div>
+        <div className="osRow">
+          <span>OS:</span>
+          <button
+            type="button"
+            className={selectedOs === "mac" ? "tab activeTab" : "tab"}
+            onClick={() => setSelectedOs("mac")}
+          >
+            macOS
+          </button>
+          <button
+            type="button"
+            className={selectedOs === "windows" ? "tab activeTab" : "tab"}
+            onClick={() => setSelectedOs("windows")}
+          >
+            Windows
+          </button>
+        </div>
         <p>{selectedSetup.title}</p>
+        <p className="muted">{selectedSetup.intro}</p>
         <ol>
           {selectedSetup.steps.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ol>
         <div className="grid two">
-          {selectedSetup.snippets.map((snippet) => (
-            <div key={snippet} className="snippetWrap">
-              <pre>{snippet}</pre>
-              <button onClick={() => copySnippet(snippet)} type="button">
-                {copiedText === snippet ? "Copied" : "Copy"}
+          {snippetByTrack[selectedTrack].map((snippet) => (
+            <div key={snippet.key} className="snippetWrap">
+              <p className="snippetLabel">{snippet.label}</p>
+              <pre>{snippet.code}</pre>
+              <button onClick={() => copySnippet(snippet.code)} type="button">
+                {copiedText === snippet.code ? "Copied" : "Copy"}
               </button>
             </div>
           ))}
         </div>
+        <p className="linksLine">
+          Docs:{" "}
+          <a href="https://code.claude.com/docs/en/terminal-guide" target="_blank" rel="noreferrer">
+            Claude Code Terminal Guide
+          </a>{" "}
+          ·{" "}
+          <a href="https://cursor.com/docs" target="_blank" rel="noreferrer">
+            Cursor Docs
+          </a>
+        </p>
       </section>
 
-      <section className="card">
+      <section className="card" id="how">
         <h2>How It Works</h2>
-        <div className="steps">
-          <span>Plan</span>
-          <span>Build</span>
-          <span>Preview</span>
-          <span>Deploy</span>
+        <div className="steps flow">
+          <span>1. PLAN</span>
+          <span className="arrow">→</span>
+          <span>2. BUILD</span>
+          <span className="arrow">→</span>
+          <span>3. PREVIEW</span>
+          <span className="arrow">→</span>
+          <span>4. DEPLOY</span>
         </div>
+        <p className="muted">
+          You have 3 hours. Build ONE feature. Polish it. Ship it.
+        </p>
       </section>
 
-      <section className="card">
+      <section className="card" id="ideas">
         <h2>Project Ideas (Beginner Friendly)</h2>
         <ul>
           {projectIdeas.map((idea) => (
             <li key={idea}>{idea}</li>
           ))}
         </ul>
+        <p className="muted">Do not see your idea? Build what you need.</p>
       </section>
 
       <section className="card">
-        <h2>Quality Tips</h2>
+        <h2>Get Better Results from AI</h2>
         <ul>
           {tips.map((tip) => (
             <li key={tip}>{tip}</li>
@@ -232,11 +379,14 @@ export default function HomePage() {
         </ul>
       </section>
 
-      <section className="card">
+      <section className="card" id="schedule">
         <h2>Event Schedule</h2>
         <div className="schedule">
           {schedule.map(([time, activity]) => (
-            <div key={`${time}-${activity}`} className="row">
+            <div
+              key={`${time}-${activity}`}
+              className={`row ${time === "14:30" || time === "17:30" ? "highlight" : ""}`}
+            >
               <strong>{time}</strong>
               <span>{activity}</span>
             </div>
@@ -244,21 +394,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="card">
+      <section className="card" id="faq">
         <h2>FAQ</h2>
         <div className="faqList">
-          {faq.map((item) => (
-            <details key={item.q}>
-              <summary>{item.q}</summary>
-              <p>{item.a}</p>
-            </details>
+          {faq.map((item, idx) => (
+            <div key={item.q} className="faqItem">
+              <button
+                type="button"
+                className="faqButton"
+                onClick={() => setOpenFaq(openFaq === idx ? -1 : idx)}
+              >
+                {item.q}
+              </button>
+              {openFaq === idx ? <p>{item.a}</p> : null}
+            </div>
           ))}
         </div>
       </section>
 
       <footer className="footer">
-        <p>Erasmus AI Society x Claude Hackathon · April 9, 2026</p>
-        <p>Organizer: Erasmus AI Society · Powered by Anthropic</p>
+        <p>Organized by Erasmus AI Society</p>
+        <p>Powered by Anthropic</p>
+        <p>
+          <a href="#">Redeem credits</a> ·{" "}
+          <a href="https://code.claude.com/docs/en/terminal-guide" target="_blank" rel="noreferrer">
+            Claude Code docs
+          </a>{" "}
+          ·{" "}
+          <a href="https://cursor.com/docs" target="_blank" rel="noreferrer">
+            Cursor docs
+          </a>
+        </p>
+        <p>Contact: hello@erasmusaisociety.nl · Built with Claude Code</p>
       </footer>
     </main>
   );
